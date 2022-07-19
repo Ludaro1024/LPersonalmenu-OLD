@@ -12,12 +12,59 @@ local Keys = {
 }
 Translation = {}
 Config.ESXEvent = 'esx:getSharedObject'  
-Config.Debug = false
+Config.Debug = true
 Config.Spam = false
 Config.EsxLicense = true
 Config.Currency = "€"
 Config.Button = Keys['E']
 Config.Locale = 'en'
+Config.CompanyManagementgrade = {
+{job = "police", grade = 4},  {job = "ambulance", grade = 4},
+}
+Config.meeleeweapons = {
+    {n = "knife", spawnname = "weapon_knife"},  -- spawn names please in lowercase
+    { n = "Baseball Bat", spawnname = "weapon_bat"},
+    {n = "golfclub", spawnname = "weapon_golfclub"}, 
+    {n = "Bottle", spawnname = "weapon_bottle"}, 
+}
+
+Config.pistolweapons = {
+    {n = "knife", spawnname = "weapon_knife"},  -- spawn names please in lowercase
+    { n = "Baseball Bat", spawnname = "weapon_bat"},
+    {n = "golfclub", spawnname = "weapon_golfclub"}, 
+    {n = "Bottle", spawnname = "weapon_bottle"}, 
+}
+
+Config.mgweapons = {
+    {n = "AK-47", spawnname = "weapon_assaultrifle"},  -- spawn names please in lowercase
+    { n = "MG", spawnname = "weapon_mg"},
+    {n = "Heavy Rifle", spawnname = "weapon_heavyrifle"},
+}
+
+Config.shotgunweapons = {
+    { n = "pump shotgun", spawnname = "weapon_pumpshotgun"},
+    { n = "pump mk2", spawnname = "weapon_pumpshotgun_mk2"},
+    { n = "auto shotgun", spawnname = "weapon_autoshotgun"},
+}
+
+Config.sniperweapons = {
+    {n = "Sniperrifle", spawnname = "weapon_sniperrifle"},  -- spawn names please in lowercase
+    { n = "Heavy Sniper", spawnname = "weapon_heavysniper"}, 
+}
+
+Config.heavyweapons = {
+    {n = "RPG", spawnname = "weapon_rpg"},  -- spawn names please in lowercase
+    { n = "Grenade Launcher", spawnname = "weapon_grenadelauncher"},
+}
+
+Config.miscweapons = {
+    {n = "grenade", spawnname = "weapon_grenade"},  -- spawn names please in lowercase
+    { n = "molotov", spawnname = "weapon_molotov"},
+    {n = "smoke grenade", spawnname = "weapon_smokegrenade"}, 
+}
+
+Config.Doors = { "Fahrertür", "Beifahrertür", "Hinterer Linkere Tür", "Hintere Rechte Tür", "Kofferraum"}
+
 
 function notification(txt)
     ESX.ShowNotification(txt)
@@ -30,6 +77,7 @@ Config.Weaponmenu = true
 Config.VehicleMenu = true
 Config.CompanyMenu = true
 Config.Adminmenu = true
+Config.AdminGroups = { "Superadmin", "admin"}
  -- ~g~ for green  ~r~~ for red and ~w~~ for white and so on :)
 Translation = {
     ['de'] = {
@@ -44,8 +92,40 @@ Translation = {
         ['give'] = "dieses Item weitergeben",
         ['use'] = "~g~Item Benutzen",
         ['drop'] = "~r~drop the item",
-        ['name'] = "Dein Name:",
-        ['job'] = "Dein Beruf:",
+        ['name'] = "Dein Name : ",
+        ['job'] = "Dein Beruf : ",
+        ['weaponmenu'] = "Waffen-Menü",
+        ['meele'] = "Nahkampf-Waffen",
+        ['pistol'] = "Pistolen",
+        ['mg'] = "MG´s",
+        ['shotgun'] = "Shotguns",
+        ['sniper'] = "Snipe:",
+        ['heavy'] = "Starke Kaliber",
+        ['misc'] = "etc.",
+        ['clothes'] = "Clothes-Menu",
+        ['Torso'] = "Take off Torso",
+        ['Pants'] = "Take off Pants",
+        ['Shoes'] = "Take off Shoes",
+        ['Bag'] = "Take off Bag",
+        ['bproof'] = "Take off Vest",
+        ['mask'] = "Take off/on mask",
+        ['hat'] = "Take off/on accessiores",
+        ['accessiores'] = "Take off/on accessiores",
+        ['gloves'] = "Take off/on gloves",
+        ['vehiclemenu'] = "Vehicle-Menu",
+        ['motor1'] = "Turn Engine OFF (Without Auto-Start)",
+        ['motor2'] = "Turn Engine OFF (With Auto-Start)",
+        ['doors'] = "Open Door:",
+        ['door1'] = "Driver Door",
+        ['door2'] = "Passenger Door",
+        ['door3'] = "Back Left Door",
+        ['door4'] = "Back Right door",
+        ['door5'] = "Trunk",
+        ['companymenu'] = "Company-Management",
+        ['companymoney'] = "Company-Money: ",     
+        ['fire'] = "~r~Fire the nerarest person!: ",     
+        ['firee'] = "You Fired the nearest person,!: ", 
+        ['adminmenu'] = "Adminmenu (WIP!): ", 
     },
     ['en'] = {
         ['MainMenuname'] = 'Server-Name Here!',
@@ -59,7 +139,40 @@ Translation = {
         ['give'] = "~g~Give item to nearest person",
         ['use'] = "~g~use item",
         ['drop'] = "~r~drop the item",
-        ['name'] = "Your Name:",
-        ['job'] = "Your Profession:",
+        ['name'] = "Your Name : ",
+        ['job'] = "Your Profession : ",
+        ['weaponmenu'] = "Weapon-Menu",
+        ['meele'] = "meele",
+        ['pistol'] = "Pistols",
+        ['mg'] = "MG´s",
+        ['shotgun'] = "Shotguns",
+        ['sniper'] = "Sniper",
+        ['heavy'] = "Heavy Weapons",
+        ['misc'] = "etc.",
+        ['clothes'] = "Clothes-Menu",
+        ['Torso'] = "Take off Torso / Put on Torso",
+        ['Pants'] = "Take off Pants / Put on Pants",
+        ['Shoes'] = "Take off Shoes / Put on Shoes",
+        ['Bag'] = "Take off Bag / Put Bag on",
+        ['bproof'] = "Take off Vest / Put Vest on",
+        ['mask'] = "Take off/on mask",
+        ['hat'] = "Take off/on hat",
+        ['accessiores'] = "Take off/on accessiores",
+        ['gloves'] = "Take off/on gloves",
+        ['vehiclemenu'] = "Vehicle-Menu",
+        ['motor1'] = "Turn Engine OFF (Without Auto-Start)",
+        ['motor2'] = "Turn Engine OFF (With Auto-Start)",
+        ['doors'] = "Open Door:",
+        ['door1'] = "Driver Door",
+        ['door2'] = "Passenger Door",
+        ['door3'] = "Back Left Door",
+        ['door4'] = "Back Right door",
+        ['door5'] = "Trunk",
+        ['companymenu'] = "Company-Management",   
+        ['companymoney'] = "Company-Money: ",     
+        ['fire'] = "~r~Fire the nerarest person!: ",     
+        ['firee'] = "You Fired the nearest person,!: ", 
+        ['adminmenu'] = "Adminmenu (WIP!): ", 
+         
 }
 }
