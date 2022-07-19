@@ -11,3 +11,5 @@ to use this you need NativeUI or NativeUIReloaded (both should work) an sql scri
 Right now only Inventory and Wallet are working, im heavily working on it.
 
 the code shouldnt be looked upon i tried alot of new stuff and had a seizure while writing it.
+
+Showcase --> https://streamable.com/pq1tfy
