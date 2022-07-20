@@ -9,7 +9,7 @@ local Keys = {
 	['LEFT'] = 174, ['RIGHT'] = 175, ['TOP'] = 27, ['DOWN'] = 173,
 	['NENTER'] = 201, ['N4'] = 108, ['N5'] = 60, ['N6'] = 107, ['N+'] = 96, ['N-'] = 97, ['N7'] = 117, ['N8'] = 61, ['N9'] = 118
 }
-
+local noclip = true
 local DrawText3D = function(x, y, z, text, r, g, b, scale)
     SetDrawOrigin(x, y, z, 0)
     SetTextFont(0)
@@ -368,6 +368,7 @@ function openMenu()
         if Config.EsxLicense then
             local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = GetStuff()
             local license = _menuPool:AddSubMenu(wallet, Translation[Config.Locale]['licenses'])
+            license.SubMenu:RightLabel("a")
             refreshmenu()
             local ownedLicenses = {}
             for i=1, #licenses, 1 do
@@ -383,6 +384,7 @@ function openMenu()
                 licensee:SetRightBadge(BadgeStyle.Tick)
             else
                 licensee:SetRightBadge(BadgeStyle.Lock)
+                licensee:Enabled(false)
             end
             if not Config.Badges then
                 if ownedLicenses[v.type] then
@@ -644,6 +646,7 @@ for k, v in pairs(Config.mgweapons) do
         table.insert(doorss, Translation[Config.Locale]['door3'])
         table.insert(doorss, Translation[Config.Locale]['door4'])
         table.insert(doorss, Translation[Config.Locale]['door5'])
+        table.insert(doorss, Translation[Config.Locale]['door6'])
 
         local door = NativeUI.CreateListItem(Translation[Config.Locale]['doors'], doorss, Translation[Config.Locale]['door1'])
         vehiclemenu:AddItem(door)
@@ -662,25 +665,29 @@ for k, v in pairs(Config.mgweapons) do
                if door:Selected() and IsControlPressed(0, 18) then
                 --print(countdoor) 
                 if countdoor == nil or string.find(countdoor, Translation[Config.Locale]['door1'])   then
-                local dc = 0
+                local vehicle = GetVehiclePedIsIn(plyPed)
+                ToggleDoorOnVehicle(vehicle, 0)
                 --print(dc)
                elseif string.find(countdoor, Translation[Config.Locale]['door2']) then
-               local dc = 1
+               local vehicle = GetVehiclePedIsIn(plyPed)
+               ToggleDoorOnVehicle(vehicle, 1)
                --print(dc)
             elseif string.find(countdoor, Translation[Config.Locale]['door3']) then
-            local dc = 2
+            local vehicle = GetVehiclePedIsIn(plyPed)
+            ToggleDoorOnVehicle(vehicle, 2)
             --print(dc)
         elseif string.find(countdoor, Translation[Config.Locale]['door4']) then
-        local dc = 3
+        local vehicle = GetVehiclePedIsIn(plyPed)
+        ToggleDoorOnVehicle(vehicle, 3)
         --print(dc)
     elseif string.find(countdoor, Translation[Config.Locale]['door5']) then
-    local dc = 4
-    --print(dc)
     local vehicle = GetVehiclePedIsIn(plyPed)
-               --print(dc)
-               ToggleDoorOnVehicle(vehicle, dc)
-               SetVehicleDoorOpen(vehicle, dc, true, true)
-            end
+    ToggleDoorOnVehicle(vehicle, 4)    
+    elseif string.find(countdoor, Translation[Config.Locale]['door6']) then
+    local vehicle = GetVehiclePedIsIn(plyPed)
+    ToggleDoorOnVehicle(vehicle, 5)    
+    end
+   
           
             --_menuPool:RefreshIndex()
         end
@@ -1008,3 +1015,8 @@ end
         end
     end
 ]]
+
+
+
+
+
