@@ -35,9 +35,14 @@ MySQL.Async.fetchAll('SELECT * from licenses', {
     --print(result)
     licenselist = result
 end)
+		
+		if account ~= nil then
 TriggerEvent("esx_addonaccount:getSharedAccount","society_"..job,function(account)
     societymoney = account.money
 end)
+			else
+			societymoney = 0
+			end
 
 local onlineplayers = {}
 
