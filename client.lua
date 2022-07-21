@@ -9,23 +9,9 @@ local Keys = {
 	['LEFT'] = 174, ['RIGHT'] = 175, ['TOP'] = 27, ['DOWN'] = 173,
 	['NENTER'] = 201, ['N4'] = 108, ['N5'] = 60, ['N6'] = 107, ['N+'] = 96, ['N-'] = 97, ['N7'] = 117, ['N8'] = 61, ['N9'] = 118
 }
-local noclip = true
-local DrawText3D = function(x, y, z, text, r, g, b, scale)
-    SetDrawOrigin(x, y, z, 0)
-    SetTextFont(0)
-    SetTextProportional(0)
-    SetTextScale(0, scale or 0.2)
-    SetTextColour(r, g, b, 255)
-    SetTextDropshadow(0, 0, 0, 0, 255)
-    SetTextEdge(2, 0, 0, 0, 150)
-    SetTextDropShadow()
-    SetTextOutline()
-    SetTextEntry("STRING")
-    SetTextCentre(1)
-    AddTextComponentString(text)
-    DrawText(0, 0)
-    ClearDrawOrigin()
-end
+local noclipmode = false
+
+
 
 Citizen.CreateThread(function()
 	while ESX == nil do
@@ -43,26 +29,10 @@ Citizen.CreateThread(function()
 	end)
 local plyPed = GetPlayerPed(-1)
 
-local GetCamDirection = function()
-    local heading = GetGameplayCamRelativeHeading() + GetEntityHeading(PlayerPedId())
-    local pitch = GetGameplayCamRelativePitch()
-    
-    local x = -math.sin(heading * math.pi / 180.0)
-    local y = math.cos(heading * math.pi / 180.0)
-    local z = math.sin(pitch * math.pi / 180.0)
-    
-    local len = math.sqrt(x * x + y * y + z * z)
-    if len ~= 0 then
-        x = x / len
-        y = y / len
-        z = z / len
-    end
-    
-    return x, y, z
-end
+
 
 function GetStuff()
-    local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = exports["kimi_callbacks"]:Trigger("LMenu:GetStuff")
+    local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = exports["kimi_callbacks"]:Trigger("LMenu:GetStuff")
     
 if cash == nil then
     cash = 0
@@ -74,7 +44,7 @@ if societymoney == nil then
     societymoney = 0 
 end
 
-    return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group
+    return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers
 end
 
 function startAnimAction(lib, anim)
@@ -187,6 +157,18 @@ function setUniform(value, plyPed)
 	end)
 end
 
+function DrawTxt(text, x, y)
+	SetTextFont(0)
+	SetTextProportional(1)
+	SetTextScale(0.0, 0.4)
+	SetTextDropshadow(1, 0, 0, 0, 255)
+	SetTextEdge(1, 0, 0, 0, 255)
+	SetTextDropShadow()
+	SetTextOutline()
+	SetTextEntry("STRING")
+	AddTextComponentString(text)
+	DrawText(x, y)
+end
 
 
 _menuPool = NativeUI.CreatePool()
@@ -270,12 +252,16 @@ function openMenu()
     Citizen.CreateThread(function()
         while true do
            Citizen.Wait(0)
+
            if drop:Selected() and IsControlPressed(0, 18) then 
             if count2 == nil then
                 count2 = ESX.PlayerData.inventory[i].count + 1
             end
             --print(count2)
             dropinv(count2, ESX.PlayerData.inventory[i].label)
+            if Config.CloseMenutoUpdate then
+                _menuPool:CloseAllMenus()
+             end
             --print(count2)
             --dropinv()
             break
@@ -286,6 +272,9 @@ function openMenu()
             --dish = item:IndexToItem(index)
             --print(count1)
             giveinvv(count1)
+            if Config.CloseMenutoUpdate then
+                _menuPool:CloseAllMenus()
+             end
             break
            end
         end
@@ -337,7 +326,7 @@ function openMenu()
     end
     -- wallet
     if Config.Wallet then
-        local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = GetStuff()
+        local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = GetStuff()
 
         
         
@@ -366,9 +355,9 @@ function openMenu()
 
 
         if Config.EsxLicense then
-            local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = GetStuff()
+            local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = GetStuff()
             local license = _menuPool:AddSubMenu(wallet, Translation[Config.Locale]['licenses'])
-            license.SubMenu:RightLabel("a")
+        
             refreshmenu()
             local ownedLicenses = {}
             for i=1, #licenses, 1 do
@@ -707,7 +696,7 @@ for k, v in pairs(Config.mgweapons) do
         end
 
         if Config.CompanyMenu then
-               local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = GetStuff()
+               local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = GetStuff()
                for k, v in pairs(Config.CompanyManagementgrade) do
                 if string.match(v.job, job) and jobgrade == v.grade then
                     local companymenu  = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['companymenu'])
@@ -740,7 +729,7 @@ for k, v in pairs(Config.mgweapons) do
         end
 
         local permision = false
-        local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group = GetStuff()
+        local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = GetStuff()
         for k, v in pairs(Config.AdminGroups) do
             if group == v then
                 permission = true
@@ -750,206 +739,543 @@ for k, v in pairs(Config.mgweapons) do
     end
 
         if Config.Adminmenu and permission then
+            local cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers = GetStuff()
+
+
+                
             local adminmenu  = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['adminmenu'])
             refreshmenu()
-            local noclipmode = false
-            --local noclip = NativeUI.CreateCheckboxItem(Translation[Config.Locale]['adminmenu'], noclip, "")
-            --adminmenu:AddItem(noclip)
-            Citizen.CreateThread(function()
-                while true do
-                   Citizen.Wait(0)
-                   if noclip:Selected() and  IsControlPressed(0, 18) then 
-    
-                    if noclipmode then
-                        noclipmode = false
-                    else 
-                        noclipmode = true
-                    end
-                    if noclipmode then
-                        SetPedCanRagdoll(GetPlayerPed(-1), false)
-                       
+            local noclip = NativeUI.CreateItem(Translation[Config.Locale]['noclip'] , "")
+             
+            adminmenu:AddItem(noclip)
 
-                        local isInVehicle = IsPedInAnyVehicle(PlayerPedId(), 0)
-                        local k = nil
-                        local x, y, z = nil
+            if noclipmode then
+                noclip:SetRightBadge(BadgeStyle.Tick)
+                 else
+                    noclip:RightLabel('~r~X')
+         end
+            local noclipspeedd = Translation[Config.Locale]['noclipspeed1'] 
+            noclipspeed = {}
+       
+            table.insert(noclipspeed, Translation[Config.Locale]['noclipspeed1'])
+            table.insert(noclipspeed, Translation[Config.Locale]['noclipspeed2'])
+            table.insert(noclipspeed, Translation[Config.Locale]['noclipspeed3'])
+            table.insert(noclipspeed, Translation[Config.Locale]['noclipspeed4'])
+            table.insert(noclipspeed, Translation[Config.Locale]['noclipspeed5'])
+
+            
+     
+          local noclipspeed = NativeUI.CreateListItem(Translation[Config.Locale]['noclipspeeds'], noclipspeed, noclipspeedd)
+                        adminmenu:AddItem(noclipspeed)
+
                         
-                        if not isInVehicle then
-                            k = PlayerPedId()
-                            x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 2))
-                        else
-                            k = GetVehiclePedIsIn(PlayerPedId(), 0)
-                            x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 1))
+        
+                        adminmenu.OnListChange = function(sender, item, index)
+                            if item == noclispeed then
+                                if noclipspeed:IndexToItem(index) == nil then
+                                    noclipspeedd = Translation[Config.Locale]['noclipspeed1']
+                                else
+                            noclipspeedd = noclipspeed:IndexToItem(index)
+                                end
+                           end
                         end
-                        
-                        local dx, dy, dz = GetCamDirection()
-                        
-                        SetEntityVelocity(k, 0.0001, 0.0001, 0.0001)
-                        
-                        if IsDisabledControlJustPressed(0, Keys["LEFTSHIFT"]) then
-                            oldSpeed = currentNoclipSpeed
-                            currentNoclipSpeed = currentNoclipSpeed * 3
-                        end
-                        if IsDisabledControlJustReleased(0, Keys["LEFTSHIFT"]) then
-                            currentNoclipSpeed = oldSpeed
-                        end
-                        if currentNoclipSpeed == nil then currentNoclipSpeed = 0.5 end
-                        if IsDisabledControlPressed(0, 32) then
-                            x = x + currentNoclipSpeed * dx
-                            y = y + currentNoclipSpeed * dy
-                            z = z + currentNoclipSpeed * dz
-                        end
-                        
-                        if IsDisabledControlPressed(0, 269) then
-                            x = x - currentNoclipSpeed * dx
-                            y = y - currentNoclipSpeed * dy
-                            z = z - currentNoclipSpeed * dz
-                        end
-                        
-                        if IsDisabledControlPressed(0, Keys["SPACE"]) then
-                            z = z + currentNoclipSpeed
-                        end
-                        
-                        if IsDisabledControlPressed(0, Keys["LEFTCTRL"]) then
-                            z = z - currentNoclipSpeed
-                        end
-                        
-                        
-                        SetEntityCoordsNoOffset(k, x, y, z, true, true, true)
-                    end
-                 
-                        SetEntityVisible(PlayerPedId(), false, false)
-                  
-                
-                        local players = GetActivePlayers()
-                        for i = 1, #players do
-                
-                            local currentplayer = players[i]
-                            local ped = GetPlayerPed(currentplayer)
-                
-                            local headPos = GetPedBoneCoords(ped, 0x796E, 0, 0, 0)
-                            
-                            if ped ~= PlayerPedId() and GetDistanceBetweenCoords(headPos.x, headPos.y, headPos.z, GetEntityCoords(PlayerPedId()).x, GetEntityCoords(PlayerPedId()).y, GetEntityCoords(PlayerPedId()).z, false) < espDistance then
-                              
-                                    DrawText3D(headPos.x, headPos.y, headPos.z + 0.3, "[" .. GetPlayerServerId(currentplayer) .. "] " .. GetPlayerName(currentplayer), 255, 255, 255, 0.25)
-                            
-                                
-                                    DrawText3D(headPos.x, headPos.y, headPos.z + 0.1, ".", 255, 255, 255, 0.5)
-                           
+          
+            
+                        noclip.Activated = function(sender, index)
+                            print(noclipmode)
+                            if noclipmode then
+                                noclipmode = false
+                                if Config.Debug then print(false) end
+                                if Config.CloseMenutoUpdate then
+                                    _menuPool:CloseAllMenus()
+                                 end
+                                --SetFollowPedCamViewMode(4)
+          noclip0_pos = GetEntityCoords(PlayerPedId(), true)
                                
-                                    local cK, cL =
-                                    GetOffsetFromEntityInWorldCoords(ped, 0.75, 0.0, -0.8),
-                                    GetOffsetFromEntityInWorldCoords(ped, 0.75, 0.0, 0.6)
-                                    local be, cu, cv = GetScreenCoordFromWorldCoord(table.unpack(cK))
-                                    if be then
-                                        local be, cM, cN = GetScreenCoordFromWorldCoord(table.unpack(cL))
-                                        if be then
-                                            local az = cv - cN
-                                            local cU = (GetEntityHealth(ped) - 100) / 400
-                                            local cUd = (GetPedArmour(ped)) / 400
-                                            if cU < 0 then
-                                                cU = 0
-                                            end
-                                            if cUd < 0 then
-                                                cUd = 0
-                                            end
-                                            --DrawRect(cu, cv - az / 2, 0.005 * az, az, 255, 33, 33, 255)
-                                            if cU > 0 then
-                                                DrawRect(cu, cv - az / 2, 0.005 * az, az * cU * 4, 33, 255, 33, 255)
-                                            end
-                                            if cUd > 0 then
-                                                DrawRect(cu - 0.005, cv - az / 2, 0.005 * az, az * cU * 4, 0, 0, 255, 255)
-                                            end
-                                        end
-                                    end
+                                 else
+                                     noclipmode = true
+                                     if Config.CloseMenutoUpdate then
+                                        _menuPool:CloseAllMenus()
+                                     end
+                                     --SetFollowPedCamViewMode(4)
+                                     noclip0_pos = GetEntityCoords(PlayerPedId(), true)
+                                     noclipcheck(noclipspeedd)
+                            
+                                  
+                                     if Config.Debug then print(true) end
+                        end
+                        end
+ 
+
+                    local tpplayer, tpplayer2 = onlineplayers[1]
+ 
+
+               local ownid = false
+                        local tp1 = NativeUI.CreateListItem(Translation[Config.Locale]['tp1'], onlineplayers, onlineplayers[0])
+                        local tp2 = NativeUI.CreateListItem(Translation[Config.Locale]['tp2'], onlineplayers, onlineplayers[0])
+                        adminmenu:AddItem(tp1)
+                        adminmenu:AddItem(tp2)
+                  
+
+                        adminmenu.OnListChange = function(sender, item, index)
+                            if item == tp1 then
+                                if tp1:IndexToItem(index) == nil then
+                                    tpplayer = onlineplayers[0]
+                                elseif tp1:IndexToItem(index) == GetPlayerServerId(PlayerId()) then
+                                ownid = true
+                            else
+                            tpplayer = tp1:IndexToItem(index)
+                                end
+                           end
+                        end
+
+                        adminmenu.OnListChange = function(sender, item, index)
+                            if item == tp2 then
+                                if tp2:IndexToItem(index) == nil then
+                                    tpplayer2 = onlineplayers[0]
+                                elseif tp1:IndexToItem(index) == GetPlayerServerId(PlayerId()) then
+                                    ownid = true
+                                else
+                            tpplayer2 = tp2:IndexToItem(index)
+                                end
+                           end
+                        end
+
+                        local tpcoords = NetworkGetPlayerCoords(tpplayer)
+                 local mycoords = GetEntityCoords(plyPed)
+                        Citizen.CreateThread(function()
+                            while true do
+                               Citizen.Wait(0)
+
+                 if tp1:Selected() and IsControlPressed(0, 18) and ownid then
+                SetEntityCoords(plyPed, tpcoords.x, tpcoords.y, tpcoords.z, 0, 0, 0, false)
+           --elseif tp1:Selected() and IsControlPressed(0, 18) and not ownid then
+                -- notification(Translation[Config.Locale]['tpyourself'])
+                end
+                            if tp2:Selected() and IsControlPressed(0, 18) and ownid then
+                                SetEntityCoords(GetPlayerPed(tpplayer), mycoords.x, mycoords.y, mycoords.z, 0, 0, 0, false)
+                            --elseif tp2:Selected() and IsControlPressed(0, 18) and not ownid then
+                              --  notification(Translation[Config.Locale]['tpyourself'])
+                        end
+                    end
+                        end)
+
+
+            
+            
+                        local tpm = NativeUI.CreateItem(Translation[Config.Locale]['tpm'] , "")
+                        adminmenu:AddItem(tpm)
+
+
+
+                        for k, v in pairs(Config.AdminMenuRights) do
+                            if group ~= v.noclip and v.noclip ~= nil then
+             noclip:Enabled(false)
+             noclipspeed:Enabled(false)
+                            if group ~= v.tp and v.tp ~= nil then
+                               tp1:Enabled(false)
+                               tp2:Enabled(false)
+                        end
+                        if group ~= v.tpm and v.tpm ~= nil then
+                            tpm:Enabled(false)
+                    end
+
+                    if group ~= v.givemoney and v.tpm ~= nil then
+                        givemoney:Enabled(false)
+                        givemoneyb:Enabled(false)
+                    end
+                    if group ~= v.coords and v.coords ~= nil then
+                       coords:Enabled(false)
+                    end
+                    if group ~= v.car and v.car ~= nil then
+                        car:Enabled(false)
+                     end
+                     if group ~= v.ShowPlayerNames and v.ShowPlayerNames ~= nil then
+                      ShowPlayerNames:Enabled(false)
+                     end
+                     if group ~= v.revive and v.revive ~= nil then
+                        revive:Enabled(false)
+                     end
+                     ShowPlayerNames:Enabled(false)
+                    end
+                    end
+
+
+                    tpm.Activated = function(sender, index)
+                       TeleportToWaypoint()
+                    end 
+
+                    local givemoney = NativeUI.CreateListItem(Translation[Config.Locale]['givemoney'], onlineplayers, onlineplayers[0])
+                    adminmenu:AddItem(givemoney)
+                    local moneyid = onlineplayers[1]
+                    adminmenu.OnListChange = function(sender, item, index)
+                        if item == givemoney then
+                            if givemoney:IndexToItem(index) == nil then
+                                moneyid = onlineplayers[1]
+                            else
+                     moneyid = givemoney:IndexToItem(index)
                             end
-                   end
+                       end
+                    end
+                    Citizen.CreateThread(function()
+                        while true do
+                           Citizen.Wait(0)
+
+                           
+
+if givemoney:Selected() and IsControlPressed(0, 18) then
+    local Text = Translation[Config.Locale]['howmuchmoney'] -- ersetzen mit einer Nachricht
+AddTextEntry(Text, Text)
+DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 10 + 1) -- Groß wäre 120 statt 10 
+        while(UpdateOnscreenKeyboard() == 0) do
+            DisableAllControlActions(0);
+            Wait(0);
+        end
+        if(GetOnscreenKeyboardResult()) then
+            result = GetOnscreenKeyboardResult()
+        end 
+
+        TriggerServerEvent("LPMenu:GiveMoney", moneyid, result)
+
+end
+end
+end)
+
+local givemoneyb = NativeUI.CreateListItem(Translation[Config.Locale]['givebank'], onlineplayers, onlineplayers[0])
+                    adminmenu:AddItem(givemoneyb)
+                    local moneyid = onlineplayers[1]
+                    adminmenu.OnListChange = function(sender, item, index)
+                        if item == givemoney then
+                            if givemoneyb:IndexToItem(index) == nil then
+                                moneyid = onlineplayers[1]
+                            else
+                     moneyid = givemoneyb:IndexToItem(index)
+                            end
+                       end
+                    end
+                    Citizen.CreateThread(function()
+                        while true do
+                           Citizen.Wait(0)
+
+if givemoneyb:Selected() and IsControlPressed(0, 18) then
+    local Text = Translation[Config.Locale]['howmuchmoney'] -- ersetzen mit einer Nachricht
+AddTextEntry(Text, Text)
+DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 10 + 1) -- Groß wäre 120 statt 10 
+        while(UpdateOnscreenKeyboard() == 0) do
+            DisableAllControlActions(0);
+            Wait(0);
+        end
+        if(GetOnscreenKeyboardResult()) then
+            result = GetOnscreenKeyboardResult()
+        end 
+
+        TriggerServerEvent("LPMenu:GiveMoneyb", moneyid, result)
+
+end
+end
+end)
+
+local coords = NativeUI.CreateItem(Translation[Config.Locale]['showcoords'], "")
+adminmenu:AddItem(coords)
+
+
+
+
+coords:RightLabel('~g~>>>')
+
+
+coords.Activated = function(sender, index)
+    if cords == true then
+        cords = false
+    else
+
+        cords = true
+        coords:SetRightBadge(BadgeStyle.Tick)
+    end
+    Citizen.CreateThread(function()
+        while true do
+            Citizen.Wait(0)
+            if cords then
+                coords:SetRightBadge(BadgeStyle.Tick)
+            local entity = IsPedInAnyVehicle(PlayerPedId()) and GetVehiclePedIsIn(PlayerPedId(), false) or PlayerPedId()
+            x, y, z = table.unpack(GetEntityCoords(entity, true))
+            
+            roundx = tonumber(string.format("%.2f", x))
+            roundy = tonumber(string.format("%.2f", y))
+            roundz = tonumber(string.format("%.2f", z))
+            
+            DrawTxt("~r~X:~s~ "..roundx, 0.32, 0.00)
+            DrawTxt("~r~Y:~s~ "..roundy, 0.38, 0.00)
+            DrawTxt("~r~Z:~s~ "..roundz, 0.445, 0.00)
+    
+            heading = GetEntityHeading(entity)
+            roundh = tonumber(string.format("%.2f", heading))
+            DrawTxt("~r~H:~s~ "..roundh, 0.50, 0.00)
             end
         end
-                end)
+    end)
+end
+local ShowPlayerNames = NativeUI.CreateItem(Translation[Config.Locale]['ShowPlayerNames'] , "")
+ShowPlayerNames:Enabled(false)
+adminmenu:AddItem(ShowPlayerNames)
+ShowPlayerNames:RightLabel('~g~>>>')
+
+
+local revive = NativeUI.CreateListItem(Translation[Config.Locale]['revive'], onlineplayers, onlineplayers[0])
+adminmenu:AddItem(revive)
+local reviveid = onlineplayers[1]
+
+adminmenu.OnListChange = function(sender, item, index)
+    if item == revive then
+        if revive:IndexToItem(index) == nil then
+            reviveid = onlineplayers[1]
+        else
+ reviveid = revive:IndexToItem(index)
+        end
+   end
+end
+Citizen.CreateThread(function()
+    while true do
+       Citizen.Wait(0)
+if revive:Selected() then
+    print(reviveid)
+    TriggerServerEvent('esx_ambulancejob:revive', reviveid)
+end
+end
+end)
+
+--[[
+ShowPlayerNames.Activated = function (sender,index)
+    Citizen.CreateThread(function()
+        while true do
+            Wait(0)
+    local health, headDots, showNames = true
+    local players = GetActivePlayers()
+    for i = 1, #players do
+
+        local currentplayer = players[i]
+        local ped = GetPlayerPed(currentplayer)
+
+        local headPos = GetPedBoneCoords(ped, 0x796E, 0, 0, 0)
+        
+        if ped ~= PlayerPedId() and GetDistanceBetweenCoords(headPos.x, headPos.y, headPos.z, GetEntityCoords(PlayerPedId()).x, GetEntityCoords(PlayerPedId()).y, GetEntityCoords(PlayerPedId()).z, false) < espDistance then
+            if showNames then
+                DrawText3D(headPos.x, headPos.y, headPos.z + 0.3, "[" .. GetPlayerServerId(currentplayer) .. "] " .. GetPlayerName(currentplayer), 255, 255, 255, 0.25)
+            end
+            if headDots then
+                DrawText3D(headPos.x, headPos.y, headPos.z + 0.1, ".", 255, 255, 255, 0.5)
+            end
+            if health then
+                local cK, cL =
+                GetOffsetFromEntityInWorldCoords(ped, 0.75, 0.0, -0.8),
+                GetOffsetFromEntityInWorldCoords(ped, 0.75, 0.0, 0.6)
+                local be, cu, cv = GetScreenCoordFromWorldCoord(table.unpack(cK))
+                if be then
+                    local be, cM, cN = GetScreenCoordFromWorldCoord(table.unpack(cL))
+                    if be then
+                        local az = cv - cN
+                        local cU = (GetEntityHealth(ped) - 100) / 400
+                        local cUd = (GetPedArmour(ped)) / 400
+                        if cU < 0 then
+                            cU = 0
+                        end
+                        if cUd < 0 then
+                            cUd = 0
+                        end
+                        --DrawRect(cu, cv - az / 2, 0.005 * az, az, 255, 33, 33, 255)
+                        if cU > 0 then
+                            DrawRect(cu, cv - az / 2, 0.005 * az, az * cU * 4, 33, 255, 33, 255)
+                        end
+                        if cUd > 0 then
+                            DrawRect(cu - 0.005, cv - az / 2, 0.005 * az, az * cU * 4, 0, 0, 255, 255)
+                        end
+                    end
+                end
+end
+end
+end
+end
+end
+end
+]]
+
+
+
+                    local car = NativeUI.CreateItem(Translation[Config.Locale]['car'] , "")
+                    adminmenu:AddItem(car)
+
+                    car.Activated = function(sender, index)
+                        local Text = Translation[Config.Locale]['inputcarname'] 
+                        AddTextEntry(Text, Text)
+                        DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 20 + 1) -- Groß wäre 120 statt 10 
+                                while(UpdateOnscreenKeyboard() == 0) do
+                                    DisableAllControlActions(0);
+                                    Wait(0);
+                                end
+                                if(GetOnscreenKeyboardResult()) then
+                                    result = GetOnscreenKeyboardResult()
+                                end
+
+                                local x,y,z = table.unpack(GetOffsetFromEntityInWorldCoords(PlayerPedId(), 0.0, 8.0, 0.5))
+                                local veh = result
+                                if veh == nil then veh = "adder" end
+                                vehiclehash = GetHashKey(veh)
+                                RequestModel(vehiclehash)
+                                
+                                Citizen.CreateThread(function() 
+                                    local waiting = 0
+                                    while not HasModelLoaded(vehiclehash) do
+                                        waiting = waiting + 100
+                                        Citizen.Wait(100)
+                                        if waiting > 5000 then
+                                           notification("Auto Wurde nicht gefunden, bist du blind bruder? Gib ein richtiges auto ein!", "error")
+                                            break
+                                        end
+                                    end
+                                    CreateVehicle(vehiclehash, x, y, z, GetEntityHeading(PlayerPedId())+90, 1, 0)
+                                end)    
+                     end 
+             
+                
+
+
             local back = NativeUI.CreateItem(Translation[Config.Locale]['back'], "")
             adminmenu:AddItem(back)
+            
             back:RightLabel('~r~>>>')
             back.Activated = function(sender, index)
                 backtostart()
-            end
-           
+            end 
+        end  
 end
-end
 
-Citizen.CreateThread(function() --Godmode
-	while true do
-		Citizen.Wait(1)
 
-		if noclipmode then
-			SetEntityInvincible(GetPlayerPed(-1), true)
-			SetPlayerInvincible(PlayerId(), true)
-			SetPedCanRagdoll(GetPlayerPed(-1), true)
-			ClearPedBloodDamage(GetPlayerPed(-1))
-			ResetPedVisibleDamage(GetPlayerPed(-1))
-			ClearPedLastWeaponDamage(GetPlayerPed(-1))
-			SetEntityProofs(GetPlayerPed(-1), true, true, true, true, true, true, true, true)
-			SetEntityOnlyDamagedByPlayer(GetPlayerPed(-1), false)
-			SetEntityCanBeDamaged(GetPlayerPed(-1), false)
 
-                local isInVehicle = IsPedInAnyVehicle(PlayerPedId(), 0)
-                local k = nil
-                local x, y, z = nil
-                
-                if not isInVehicle then
-                    k = PlayerPedId()
-                    x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 2))
-                else
-                    k = GetVehiclePedIsIn(PlayerPedId(), 0)
-                    x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 1))
-                end
-                
-                local dx, dy, dz = GetCamDirection()
-                
-                SetEntityVelocity(k, 0.0001, 0.0001, 0.0001)
-                
-                if IsDisabledControlJustPressed(0, VibeIKeys["LEFTSHIFT"]) then
-                    oldSpeed = currentNoclipSpeed
-                    currentNoclipSpeed = currentNoclipSpeed * 3
-                end
-                if IsDisabledControlJustReleased(0, VibeIKeys["LEFTSHIFT"]) then
-                    currentNoclipSpeed = oldSpeed
-                end
-                if currentNoclipSpeed == nil then currentNoclipSpeed = 0.5 end
-                if IsDisabledControlPressed(0, 32) then
-                    x = x + currentNoclipSpeed * dx
-                    y = y + currentNoclipSpeed * dy
-                    z = z + currentNoclipSpeed * dz
-                end
-                
-                if IsDisabledControlPressed(0, 269) then
-                    x = x - currentNoclipSpeed * dx
-                    y = y - currentNoclipSpeed * dy
-                    z = z - currentNoclipSpeed * dz
-                end
-                
-                if IsDisabledControlPressed(0, VibeIKeys["SPACE"]) then
-                    z = z + currentNoclipSpeed
-                end
-                
-                if IsDisabledControlPressed(0, VibeIKeys["LEFTCTRL"]) then
-                    z = z - currentNoclipSpeed
-                end
-                
-                
-                SetEntityCoordsNoOffset(k, x, y, z, true, true, true)
+
+
+
+
             
-        else
-			SetEntityInvincible(GetPlayerPed(-1), false)
-			SetPlayerInvincible(PlayerId(), false)
-			SetPedCanRagdoll(GetPlayerPed(-1), true)
-			ClearPedLastWeaponDamage(GetPlayerPed(-1))
-			SetEntityProofs(GetPlayerPed(-1), false, false, false, false, false, false, false, false)
-			SetEntityOnlyDamagedByPlayer(GetPlayerPed(-1), false)
-			SetEntityCanBeDamaged(GetPlayerPed(-1), true)
-		end
-	end
-end)
+TeleportToWaypoint = function()
+    local WaypointHandle = GetFirstBlipInfoId(8)
 
+    if DoesBlipExist(WaypointHandle) then
+        local waypointCoords = GetBlipInfoIdCoord(WaypointHandle)
+
+        for height = 1, 1000 do
+            SetPedCoordsKeepVehicle(PlayerPedId(), waypointCoords["x"], waypointCoords["y"], height + 0.0)
+
+            local foundGround, zPos = GetGroundZFor_3dCoord(waypointCoords["x"], waypointCoords["y"], height + 0.0)
+
+            if foundGround then
+                SetPedCoordsKeepVehicle(PlayerPedId(), waypointCoords["x"], waypointCoords["y"], height + 0.0)
+
+                break
+            end
+
+            Citizen.Wait(5)
+         end
+         nwaotification(Translation[Config.Locale]['tpms'])
+    else
+       notification(Translation[Config.Locale]['nowaypoint'])
+    end
+end
+
+
+
+function noclipcheck(noclipspeedd)
+    print(noclipspeedd)
+if string.find(noclipspeedd, Translation[Config.Locale]['noclipspeed1']) then
+    local currentNoclipSpeed = Config.NoclipSpeed1
+elseif string.find(noclipspeedd, Translation[Config.Locale]['noclipspeed2']) then
+    local currentNoclipSpeed = Config.NoclipSpeed2
+elseif string.find(noclipspeedd, Translation[Config.Locale]['noclipspeed3']) then
+    local currentNoclipSpeed = Config.NoclipSpeed3
+elseif string.find(noclipspeedd, Translation[Config.Locale]['noclipspeed4']) then
+    local currentNoclipSpeed = Config.NoclipSpeed4
+elseif string.find(noclipspeedd, Translation[Config.Locale]['noclipspeed5']) then
+    local currentNoclipSpeed = Config.NoclipSpeed5
+end
+end
+
+
+
+    
+
+
+local GetCamDirection = function()
+        local heading = GetGameplayCamRelativeHeading() + GetEntityHeading(PlayerPedId())
+        local pitch = GetGameplayCamRelativePitch()
+        
+        local x = -math.sin(heading * math.pi / 180.0)
+        local y = math.cos(heading * math.pi / 180.0)
+        local z = math.sin(pitch * math.pi / 180.0)
+        
+        local len = math.sqrt(x * x + y * y + z * z)
+        if len ~= 0 then
+            x = x / len
+            y = y / len
+            z = z / len
+        end
+        
+        return x, y, z
+end
+
+Citizen.CreateThread(function()
+    while true do
+        Wait(0)
+        if noclipmode then
+    local isInVehicle = IsPedInAnyVehicle(PlayerPedId(), 0)
+    local k = nil
+    local x, y, z = nil
+    
+    if not isInVehicle then
+        k = PlayerPedId()
+        x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 2))
+    else
+        k = GetVehiclePedIsIn(PlayerPedId(), 0)
+        x, y, z = table.unpack(GetEntityCoords(PlayerPedId(), 1))
+    end
+    
+    local dx, dy, dz = GetCamDirection()
+    
+    SetEntityVelocity(k, 0.0001, 0.0001, 0.0001)
+    
+    if IsDisabledControlJustPressed(0, Keys["LEFTSHIFT"]) then
+        oldSpeed = currentNoclipSpeed
+        currentNoclipSpeed = currentNoclipSpeed * 3
+    end
+    if IsDisabledControlJustReleased(0, Keys["LEFTSHIFT"]) then
+        currentNoclipSpeed = oldSpeed
+    end
+    if currentNoclipSpeed == nil then currentNoclipSpeed = 0.5 end
+    if IsDisabledControlPressed(0, 32) then
+        x = x + currentNoclipSpeed * dx
+        y = y + currentNoclipSpeed * dy
+        z = z + currentNoclipSpeed * dz
+    end
+    
+    if IsDisabledControlPressed(0, 269) then
+        x = x - currentNoclipSpeed * dx
+        y = y - currentNoclipSpeed * dy
+        z = z - currentNoclipSpeed * dz
+    end
+    
+    if IsDisabledControlPressed(0, Keys["SPACE"]) then
+        z = z + currentNoclipSpeed
+    end
+    
+    if IsDisabledControlPressed(0, Keys["LEFTCTRL"]) then
+        z = z - currentNoclipSpeed
+    end
+    
+    
+    SetEntityCoordsNoOffset(k, x, y, z, true, true, true)
+else
+
+end
+end
+end)
 
 
 _menuPool:RefreshIndex()
@@ -960,61 +1286,6 @@ function refreshmenu()
     _menuPool:ControlDisablingEnabled(false)
 end
 
-
-
---[[
-     vehiclemenu:AddItem(motor1)
-
-        local motor2 = NativeUI.CreateItem(Translation[Config.Locale]['motor2'], "")
-
-        motor2.Activated = function(sender, index)
-            local vehicle = GetVehiclePedIsIn(plyPed)
-            if GetIsVehicleEngineRunning(vehicle) then
-                SetVehicleEngineOn(vehicle, false, false, false)
-            else
-                SetVehicleEngineOn(vehicle, true, false, false)
-            end
-        vehiclemenu:AddItem(motor2)
-
-
-
-        doorss = {}
-       
-        table.insert(doorss, Translation[Config.Locale]['door1'])
-        table.insert(doorss, Translation[Config.Locale]['door2'])
-        table.insert(doorss, Translation[Config.Locale]['door3'])
-        table.insert(doorss, Translation[Config.Locale]['door4'])
-        table.insert(doorss, Translation[Config.Locale]['door5'])
-
-        local door = NativeUI.CreateListItem(Translation[Config.Locale]['doors'], doorss, Translation[Config.Locale]['door1'])
-        vehiclemenu:AddItem(door)
-        
-        vehiclemenu.OnListChange = function(sender, item, index)
-            if item == door then
-                countdoor = door:IndexToItem(index)
-            end
-        end
-        local counting = 0
-        local vehicle = GetVehiclePedIsIn(plyPed)
-        Citizen.CreateThread(function()
-            while true do
-               Citizen.Wait(0)
-               
-        end
-            end)
-
-        local back = NativeUI.CreateItem(Translation[Config.Locale]['back'], "")
-        vehiclemenu:AddItem(back)
-        back:RightLabel('~r~>>>')
-        back.Activated = function(sender, index)
-            backtostart()
-        end
-
-
-
-        end
-    end
-]]
 
 
 

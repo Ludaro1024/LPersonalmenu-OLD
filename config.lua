@@ -63,12 +63,20 @@ Config.miscweapons = {
     {n = "smoke grenade", spawnname = "weapon_smokegrenade"}, 
 }
 
-Config.Doors = { "Fahrertür", "Beifahrertür", "Hinterer Linkere Tür", "Hintere Rechte Tür", "Kofferraum"}
 
+Config.Noclipspeed1 = 1
+Config.Noclipspeed2 = 2
+Config.Noclipspeed3 = 3
+Config.Noclipspeed4 = 4
+Config.Noclipspeed5 = 5
 
+Config.AdminMenuRights = {
+    {noclip = "admin", tp = "admin", "superadmin", tpm = nil, givemoney = nil, coords = nil, ShowPlayerNames = nil, revive = nil } -- ONLY THESE GROUPS CAN DO THIS IF NOTHING THEN EVERY ADMIN GROUP IF NIL THEN ALL CAN DO IT
+}
 function notification(txt)
     ESX.ShowNotification(txt)
 end
+Config.CloseMenutoUpdate = true
 
 Config.Badges = true
 Config.Inventory = true
@@ -120,12 +128,33 @@ Translation = {
         ['door2'] = "Passenger Door",
         ['door3'] = "Back Left Door",
         ['door4'] = "Back Right door",
-        ['door5'] = "Trunk",
-        ['companymenu'] = "Company-Management",
-        ['companymoney'] = "Company-Money: ",     
-        ['fire'] = "~r~Fire the nerarest person!: ",     
-        ['firee'] = "You Fired the nearest person,!: ", 
-        ['adminmenu'] = "Adminmenu (WIP!): ", 
+        ['door5'] = "Motorhaube",
+        ['door6'] = "Kofferraum",
+        ['companymenu'] = "Firmen-Management",
+        ['companymoney'] = "Firmen-Geld: ",     
+        ['fire'] = "~r~Feuere die Näheste Person!: ",     
+        ['firee'] = "Du hast die Nähste person Gefeuert,!: ", 
+        ['adminmenu'] = "Adminmenü: ",
+        ['noclip'] = "Noclip:", 
+        ['noclipspeeds'] = "Noclip Geschwindigkeit:",
+        ['noclipspeed1'] = "Laaangsam",
+        ['noclipspeed2'] = "N bischen Schneller",
+        ['noclipspeed3'] = "Medium",
+        ['noclipspeed4'] = "Schnell",
+        ['noclipspeed5'] = "Gotta go fast",
+        ['tp1'] = "Teleportier dich zum Spieler: ", 
+        ['tp2'] = "Bring einen Spieler zu dir: ", 
+        ['tpm'] = "Telepier dich zum Marker",
+        ['tpms'] = "Erfolgreich zum  Marker Teleportiert!",
+        ['nowaypoint'] = "Kein Marker wurde gefunden",
+        ['car'] = "Auto Spawnen?",
+        ['inputcarname'] = "Autonamen bitte eingeben: (nil = adder)?",
+        ['givemoney'] = "Geld Vergeben",
+        ['givebank'] = "Bank-Geld Vergeben",
+        ['howmuchmoney'] = "Wieviel geld Wollen sie vergeben?",
+        ['ShowPlayerNames'] = "FUNKTIONIERT GERADE NICHT?",
+        ['revive'] = "Belebe einen Spieler wieder",
+        
     },
     ['en'] = {
         ['MainMenuname'] = 'Server-Name Here!',
@@ -167,12 +196,31 @@ Translation = {
         ['door2'] = "Passenger Door",
         ['door3'] = "Back Left Door",
         ['door4'] = "Back Right door",
-        ['door5'] = "Trunk",
+        ['door5'] = "Hood",
+        ['door6'] = "Trunk",
         ['companymenu'] = "Company-Management",   
         ['companymoney'] = "Company-Money: ",     
         ['fire'] = "~r~Fire the nerarest person!: ",     
         ['firee'] = "You Fired the nearest person,!: ", 
-        ['adminmenu'] = "Adminmenu (WIP!): ", 
-         
+        ['adminmenu'] = "Adminmenu (WIP!): ",
+        ['noclip'] = "Noclip:", 
+        ['noclipspeeds'] = "Noclip Speed:",
+        ['noclipspeed1'] = "Very-Slow",
+        ['noclipspeed2'] = "Slow",
+        ['noclipspeed3'] = "Medium",
+        ['noclipspeed4'] = "Fast",
+        ['noclipspeed5'] = "Very Fast",
+        ['tp1'] = "Go to player: ", 
+        ['tp2'] = "Bring Player to you: ", 
+        ['tpm'] = "Teleport to Marker",
+        ['tpms'] = "Successfully Teleporter to Marker!",
+        ['nowaypoint'] = "No Waypoint Found?",
+        ['car'] = "No Waypoint Found?",
+        ['inputcarname'] = "No Waypoint Found?",
+        ['givemoney'] = "Give Money",
+        ['givebank'] = "Give Bank Money",
+        ['howmuchmoney'] = "How much Money do you want to give?",
+        ['ShowPlayerNames'] = "Show Information above Players (NOT WORKING RN)?",
+        ['revive'] = "Revive a player",
 }
 }

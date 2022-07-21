@@ -39,12 +39,21 @@ TriggerEvent("esx_addonaccount:getSharedAccount","society_"..job,function(accoun
     societymoney = account.money
 end)
 
+local onlineplayers = {}
+
+for _, playerId in ipairs(GetPlayers()) do
+    table.insert(onlineplayers, playerId)
+    --print(playerId)
+end
+
+
+
 
 
     
 
 
-		return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group
+		return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers
 end)
 
 
@@ -58,3 +67,20 @@ RegisterNetEvent("LPMenu:Fire", function(playerfired)
   end)
 
 
+
+
+  RegisterNetEvent("LPMenu:GiveMoney", function(moneyid, count)
+    print(moneyid)
+    local id = moneyid
+    local xPlayer = ESX.GetPlayerFromId(id)
+    xPlayer.addAccountMoney('money', tonumber(count))
+
+  end)
+
+  RegisterNetEvent("LPMenu:GiveMoneyb", function(moneyid, count)
+    print(moneyid)
+    local id = moneyid
+    local xPlayer = ESX.GetPlayerFromId(id)
+    xPlayer.addAccountMoney('bank', tonumber(count))
+
+  end)
