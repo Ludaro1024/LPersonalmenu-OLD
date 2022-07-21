@@ -44,6 +44,11 @@ if societymoney == nil then
     societymoney = 0 
 end
 
+if group == nil then
+	group = "user" 
+end
+
+
     return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers
 end
 
