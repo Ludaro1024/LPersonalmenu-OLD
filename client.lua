@@ -48,7 +48,6 @@ if group == nil then
 	group = "user" 
 end
 
-
     return cash, bank, job, name, licenses, licenselist, jobgrade, societymoney, group, onlineplayers
 end
 
@@ -228,24 +227,24 @@ function openMenu()
     refreshmenu()
     local use = NativeUI.CreateItem(Translation[Config.Locale]['use'], "") 
     use:RightLabel('~g~>>>')
-    local drop = NativeUI.CreateListItem(Translation[Config.Locale]['drop'], invCount, ESX.PlayerData.inventory[i].count)
-    local giveinv = NativeUI.CreateListItem(Translation[Config.Locale]['give'], invCount, ESX.PlayerData.inventory[i].count )
+    local amount = NativeUI.CreateListItem(Translation[Config.Locale]['amount'], invCount, ESX.PlayerData.inventory[i].count)
+    local drop = NativeUI.CreateItem(Translation[Config.Locale]['drop'], "")
+    local giveinv = NativeUI.CreateItem(Translation[Config.Locale]['give'], "")
     local back = NativeUI.CreateItem(Translation[Config.Locale]['back'], "")
     invmenu:AddItem(use)
     invmenu:AddItem(drop)
     invmenu:AddItem(giveinv)
+    invmenu:AddItem(amount)
     invmenu:AddItem(back)
     local invnotdone = true
 
     use.Activated = function(sender, index)
     TriggerServerEvent('esx:useItem', ESX.PlayerData.inventory[i].name)
-   end
-      -- this is done because nativeui reloaded has no .acticated or anything similar for list items for WHATEVER REASON? what the fuck  WHY ARE YOU SO FRUSTRATING IM HERE SINCE 3 am i wanna kill myself ;( Please STOP THIS SUFFERING WHY IS NATIVUI SO COOL AND SHITRTY AT THE SAME TIME WHAT THE FUCK MAN)
+    end
+
       invmenu.OnListChange = function(sender, item, index)
-        if item == giveinv then
-        count1 = giveinv:IndexToItem(index)
-        elseif item == drop then   
-        count2 = drop:IndexToItem(index)
+        if item == amount then   
+        count = amount:IndexToItem(index)
        end
     end
 
@@ -254,6 +253,8 @@ function openMenu()
         ESX.PlayerData = xPlayer
     end)
 
+
+--[[
     Citizen.CreateThread(function()
         while true do
            Citizen.Wait(0)
@@ -284,6 +285,7 @@ function openMenu()
            end
         end
     end)
+    ]]
     -- this is kinda dumb, but the only reason i did this, i dont know how to solve it another way if you know it tell me please ;)
 
 
@@ -294,6 +296,28 @@ function openMenu()
     _menuPool:CloseAllMenus()
     end
     
+
+    drop.Activated = function(sender,index)
+        if count == nil then
+            count = ESX.PlayerData.inventory[i].count + 1
+        end
+        dropinv(count, ESX.PlayerData.inventory[i].label)
+        if Config.CloseMenutoUpdate then
+            _menuPool:CloseAllMenus()
+         end
+    end
+
+    giveinv.Activated = function(sender,index)
+        if count == nil then
+            count = ESX.PlayerData.inventory[i].count
+        end
+        --dish = item:IndexToItem(index)
+        --print(count1)
+        giveinvv(count)
+        if Config.CloseMenutoUpdate then
+            _menuPool:CloseAllMenus()
+         end
+    end
 
     back.Activated = function(sender, index)
    backtoinv()
@@ -525,13 +549,34 @@ for k, v in pairs(Config.mgweapons) do
              local clothesmenu = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['clothes'])
              refreshmenu()
 
+             local hat = NativeUI.CreateItem(Translation[Config.Locale]['hat'], "")
+             clothesmenu:AddItem(hat)
+             hat:RightLabel('~g~>>>')
+
+             hat.Activated = function(sender, index)
+                setUniform("hat", plyPed)
+             end
+
              local torso = NativeUI.CreateItem(Translation[Config.Locale]['Torso'], "")
              clothesmenu:AddItem(torso)
              torso:RightLabel('~g~>>>')
+             
+
+
 
              torso.Activated = function(sender, index)
                 setUniform("torso", plyPed)
              end
+
+             
+             local gloves = NativeUI.CreateItem(Translation[Config.Locale]['gloves'], "")
+             clothesmenu:AddItem(gloves)
+             gloves:RightLabel('~g~>>>')
+
+             gloves.Activated = function(sender, index)
+                setUniform("gloves", plyPed)
+             end
+                       
 
 
              local pants = NativeUI.CreateItem(Translation[Config.Locale]['Pants'], "")
@@ -566,25 +611,15 @@ for k, v in pairs(Config.mgweapons) do
                 setUniform("mask", plyPed)
              end
 
-             
-             local hat = NativeUI.CreateItem(Translation[Config.Locale]['hat'], "")
-             clothesmenu:AddItem(hat)
-             hat:RightLabel('~g~>>>')
+    
+   
+             local shoes = NativeUI.CreateItem(Translation[Config.Locale]['Shoes'], "")
+             clothesmenu:AddItem(shoes)
+             torso:RightLabel('~g~>>>')
 
-             hat.Activated = function(sender, index)
-                setUniform("hat", plyPed)
+                shoes.Activated = function(sender, index)
+                setUniform("shoes", plyPed)
              end
-
-
-             local gloves = NativeUI.CreateItem(Translation[Config.Locale]['gloves'], "")
-             clothesmenu:AddItem(gloves)
-             gloves:RightLabel('~g~>>>')
-
-             gloves.Activated = function(sender, index)
-                setUniform("gloves", plyPed)
-             end
-
-
 
              local back = NativeUI.CreateItem(Translation[Config.Locale]['back'], "")
         clothesmenu:AddItem(back)
@@ -645,18 +680,15 @@ for k, v in pairs(Config.mgweapons) do
         local door = NativeUI.CreateListItem(Translation[Config.Locale]['doors'], doorss, Translation[Config.Locale]['door1'])
         vehiclemenu:AddItem(door)
 
-        
+        local ocdoor = NativeUI.CreateItem(Translation[Config.Locale]['ocdoor'], "")
+        vehiclemenu:AddItem(ocdoor)
         vehiclemenu.OnListChange = function(sender, item, index)
             if item == door then
                 countdoor = door:IndexToItem(index)
             end
         end
-        local counting = 0
-       
-        Citizen.CreateThread(function()
-            while true do
-               Citizen.Wait(0)
-               if door:Selected() and IsControlPressed(0, 18) then
+
+        ocdoor.Activated = function()
                 --print(countdoor) 
                 if countdoor == nil or string.find(countdoor, Translation[Config.Locale]['door1'])   then
                 local vehicle = GetVehiclePedIsIn(plyPed)
@@ -680,14 +712,10 @@ for k, v in pairs(Config.mgweapons) do
     elseif string.find(countdoor, Translation[Config.Locale]['door6']) then
     local vehicle = GetVehiclePedIsIn(plyPed)
     ToggleDoorOnVehicle(vehicle, 5)    
+    end   --_menuPool:RefreshIndex()
     end
-   
-          
-            --_menuPool:RefreshIndex()
-        end
-               
-        end
-            end)
+       
+
 
         local back = NativeUI.CreateItem(Translation[Config.Locale]['back'], "")
         vehiclemenu:AddItem(back)
@@ -695,7 +723,6 @@ for k, v in pairs(Config.mgweapons) do
         back.Activated = function(sender, index)
             backtostart()
         end
-
 
 
         end
@@ -749,6 +776,8 @@ for k, v in pairs(Config.mgweapons) do
 
                 
             local adminmenu  = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['adminmenu'])
+            local id = NativeUI.CreateListItem(Translation[Config.Locale]['ID'], onlineplayers, onlineplayers[0])
+            adminmenu:AddItem(id)
             refreshmenu()
             local noclip = NativeUI.CreateItem(Translation[Config.Locale]['noclip'] , "")
              
@@ -816,54 +845,44 @@ for k, v in pairs(Config.mgweapons) do
  
 
                local ownid = false
-                        local tp1 = NativeUI.CreateListItem(Translation[Config.Locale]['tp1'], onlineplayers, onlineplayers[0])
-                        local tp2 = NativeUI.CreateListItem(Translation[Config.Locale]['tp2'], onlineplayers, onlineplayers[0])
+                        local tp1 = NativeUI.CreateItem(Translation[Config.Locale]['tp1'], "")
+                        local tp2 = NativeUI.CreateItem(Translation[Config.Locale]['tp2'], "")
                         adminmenu:AddItem(tp1)
                         adminmenu:AddItem(tp2)
                   
 
                         adminmenu.OnListChange = function(sender, item, index)
-                            if item == tp1 then
-                                if tp1:IndexToItem(index) == nil then
+                            if item == id then
+                                if id:IndexToItem(index) == nil then
                                     tpplayer = onlineplayers[0]
-                                elseif tp1:IndexToItem(index) == GetPlayerServerId(PlayerId()) then
+                                elseif id:IndexToItem(index) == GetPlayerServerId(PlayerId()) then
                                 ownid = true
                             else
-                            tpplayer = tp1:IndexToItem(index)
+                            tpplayer = id:IndexToItem(index)
                                 end
                            end
                         end
 
-                        adminmenu.OnListChange = function(sender, item, index)
-                            if item == tp2 then
-                                if tp2:IndexToItem(index) == nil then
-                                    tpplayer2 = onlineplayers[0]
-                                elseif tp1:IndexToItem(index) == GetPlayerServerId(PlayerId()) then
-                                    ownid = true
-                                else
-                            tpplayer2 = tp2:IndexToItem(index)
-                                end
-                           end
-                        end
 
                         local tpcoords = NetworkGetPlayerCoords(tpplayer)
                  local mycoords = GetEntityCoords(plyPed)
-                        Citizen.CreateThread(function()
-                            while true do
-                               Citizen.Wait(0)
 
-                 if tp1:Selected() and IsControlPressed(0, 18) and ownid then
-                SetEntityCoords(plyPed, tpcoords.x, tpcoords.y, tpcoords.z, 0, 0, 0, false)
-           --elseif tp1:Selected() and IsControlPressed(0, 18) and not ownid then
-                -- notification(Translation[Config.Locale]['tpyourself'])
-                end
-                            if tp2:Selected() and IsControlPressed(0, 18) and ownid then
+                               tp1.Activated = function(sender, index)
+                                if not ownid then
+                                    notification(Translation[Config.Locale]['tpn'])
+                                else
+                                SetEntityCoords(plyPed, tpcoords.x, tpcoords.y, tpcoords.z, 0, 0, 0, false)
+                                end
+                               end
+
+                               tp2.Activated = function(sender, index)
+                                if not ownid then
+                                    notification(Translation[Config.Locale]['tpn'])
+                                else
                                 SetEntityCoords(GetPlayerPed(tpplayer), mycoords.x, mycoords.y, mycoords.z, 0, 0, 0, false)
-                            --elseif tp2:Selected() and IsControlPressed(0, 18) and not ownid then
-                              --  notification(Translation[Config.Locale]['tpyourself'])
-                        end
-                    end
-                        end)
+                                end
+                               end
+        
 
 
             
@@ -910,26 +929,10 @@ for k, v in pairs(Config.mgweapons) do
                        TeleportToWaypoint()
                     end 
 
-                    local givemoney = NativeUI.CreateListItem(Translation[Config.Locale]['givemoney'], onlineplayers, onlineplayers[0])
+                    local givemoney = NativeUI.CreateItem(Translation[Config.Locale]['givemoney'], "")
                     adminmenu:AddItem(givemoney)
-                    local moneyid = onlineplayers[1]
-                    adminmenu.OnListChange = function(sender, item, index)
-                        if item == givemoney then
-                            if givemoney:IndexToItem(index) == nil then
-                                moneyid = onlineplayers[1]
-                            else
-                     moneyid = givemoney:IndexToItem(index)
-                            end
-                       end
-                    end
-                    Citizen.CreateThread(function()
-                        while true do
-                           Citizen.Wait(0)
-
-                           
-
-if givemoney:Selected() and IsControlPressed(0, 18) then
-    local Text = Translation[Config.Locale]['howmuchmoney'] -- ersetzen mit einer Nachricht
+                    givemoney.Activated = function(sender, index)
+                        local Text = Translation[Config.Locale]['howmuchmoney'] -- ersetzen mit einer Nachricht
 AddTextEntry(Text, Text)
 DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 10 + 1) -- Groß wäre 120 statt 10 
         while(UpdateOnscreenKeyboard() == 0) do
@@ -940,45 +943,26 @@ DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 10 + 1) -- Groß wäre 120 
             result = GetOnscreenKeyboardResult()
         end 
 
-        TriggerServerEvent("LPMenu:GiveMoney", moneyid, result)
-
+        TriggerServerEvent("LPMenu:GiveMoney", tpplayer, result)
 end
-end
-end)
 
-local givemoneyb = NativeUI.CreateListItem(Translation[Config.Locale]['givebank'], onlineplayers, onlineplayers[0])
-                    adminmenu:AddItem(givemoneyb)
-                    local moneyid = onlineplayers[1]
-                    adminmenu.OnListChange = function(sender, item, index)
-                        if item == givemoney then
-                            if givemoneyb:IndexToItem(index) == nil then
-                                moneyid = onlineplayers[1]
-                            else
-                     moneyid = givemoneyb:IndexToItem(index)
-                            end
-                       end
-                    end
-                    Citizen.CreateThread(function()
-                        while true do
-                           Citizen.Wait(0)
+local givemoneyb = NativeUI.CreateItem(Translation[Config.Locale]['givebank'], "")
+adminmenu:AddItem(givemoneyb)
 
-if givemoneyb:Selected() and IsControlPressed(0, 18) then
+givemoneyb.Activated = function(sender, index)
     local Text = Translation[Config.Locale]['howmuchmoney'] -- ersetzen mit einer Nachricht
 AddTextEntry(Text, Text)
 DisplayOnscreenKeyboard(1, Text, "", "", "", "", "", 10 + 1) -- Groß wäre 120 statt 10 
-        while(UpdateOnscreenKeyboard() == 0) do
-            DisableAllControlActions(0);
-            Wait(0);
-        end
-        if(GetOnscreenKeyboardResult()) then
-            result = GetOnscreenKeyboardResult()
-        end 
-
-        TriggerServerEvent("LPMenu:GiveMoneyb", moneyid, result)
-
+while(UpdateOnscreenKeyboard() == 0) do
+DisableAllControlActions(0);
+Wait(0);
 end
+if(GetOnscreenKeyboardResult()) then
+result = GetOnscreenKeyboardResult()
+end 
+
+TriggerServerEvent("LPMenu:GiveMoneyb", tpplayer, result)
 end
-end)
 
 local coords = NativeUI.CreateItem(Translation[Config.Locale]['showcoords'], "")
 adminmenu:AddItem(coords)
@@ -986,12 +970,12 @@ adminmenu:AddItem(coords)
 
 
 
-coords:RightLabel('~g~>>>')
 
 
 coords.Activated = function(sender, index)
     if cords == true then
         cords = false
+        coords:SetRightBadge(BadgeStyle.None)
     else
 
         cords = true
@@ -1022,32 +1006,17 @@ coords.Activated = function(sender, index)
 end
 local ShowPlayerNames = NativeUI.CreateItem(Translation[Config.Locale]['ShowPlayerNames'] , "")
 ShowPlayerNames:Enabled(false)
-adminmenu:AddItem(ShowPlayerNames)
-ShowPlayerNames:RightLabel('~g~>>>')
+--adminmenu:AddItem(ShowPlayerNames)
+--ShowPlayerNames:RightLabel('~g~>>>')
 
 
-local revive = NativeUI.CreateListItem(Translation[Config.Locale]['revive'], onlineplayers, onlineplayers[0])
+local revive = NativeUI.CreateItem(Translation[Config.Locale]['revive'], "")
 adminmenu:AddItem(revive)
-local reviveid = onlineplayers[1]
 
-adminmenu.OnListChange = function(sender, item, index)
-    if item == revive then
-        if revive:IndexToItem(index) == nil then
-            reviveid = onlineplayers[1]
-        else
- reviveid = revive:IndexToItem(index)
-        end
-   end
+revive.Activated = function(sender, index)
+    TriggerServerEvent('esx_ambulancejob:revive', tpplayer)
 end
-Citizen.CreateThread(function()
-    while true do
-       Citizen.Wait(0)
-if revive:Selected() then
-    print(reviveid)
-    TriggerServerEvent('esx_ambulancejob:revive', reviveid)
-end
-end
-end)
+
 
 --[[
 ShowPlayerNames.Activated = function (sender,index)
@@ -1108,6 +1077,7 @@ end
 
                     local car = NativeUI.CreateItem(Translation[Config.Locale]['car'] , "")
                     adminmenu:AddItem(car)
+                    car:RightLabel("~g~>>>")
 
                     car.Activated = function(sender, index)
                         local Text = Translation[Config.Locale]['inputcarname'] 

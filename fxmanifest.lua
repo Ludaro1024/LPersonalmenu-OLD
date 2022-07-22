@@ -13,7 +13,7 @@ shared_scripts {
 }
 
 client_scripts {
-	'@NativeUILua_Reloaded/src/NativeUIReloaded.lua',
+	--'@NativeUILua_Reloaded/src/NativeUIReloaded.lua',
     '@NativeUI/NativeUI.lua',
     'config.lua',
     'client.lua',

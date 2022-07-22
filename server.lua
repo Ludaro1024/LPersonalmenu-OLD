@@ -35,14 +35,15 @@ MySQL.Async.fetchAll('SELECT * from licenses', {
     --print(result)
     licenselist = result
 end)
-		
-		if account ~= nil then
-TriggerEvent("esx_addonaccount:getSharedAccount","society_"..job,function(account)
-    societymoney = account.money
-end)
-			else
-			societymoney = 0
-			end
+
+    TriggerEvent("esx_addonaccount:getSharedAccount","society_"..job,function(account)
+        if account ~= nil then
+        societymoney = account.money
+        else
+            societymoney = 0
+        end
+
+    end)
 
 local onlineplayers = {}
 
@@ -86,6 +87,7 @@ RegisterNetEvent("LPMenu:Fire", function(playerfired)
     print(moneyid)
     local id = moneyid
     local xPlayer = ESX.GetPlayerFromId(id)
+    print(count)
     xPlayer.addAccountMoney('bank', tonumber(count))
 
   end)
