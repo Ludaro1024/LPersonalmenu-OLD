@@ -361,7 +361,11 @@ function openMenu()
         
         local wallet = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['WalletItemName'])
         refreshmenu()
+		if name ~= nil then
         local name = NativeUI.CreateItem(Translation[Config.Locale]['name'] .. name, "")
+			else
+			 local name = NativeUI.CreateItem(Translation[Config.Locale]['name'] .. "Unknown", "")
+			end
         wallet:AddItem(name)
         if Config.Badges then
         name:SetRightBadge(BadgeStyle.Tick)
