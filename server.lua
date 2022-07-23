@@ -13,16 +13,16 @@ exports["kimi_callbacks"]:Register("LMenu:GetStuff", function(source)
 local _source = source
 local xPlayer = ESX.GetPlayerFromId(_source)
 
- if Player.getAccount("money").money == nil then
+ if xPlayer.getAccount("money").money == nil then
     cash = 0
 else
-    cash = Player.getAccount("money").money
+    cash = xPlayer.getAccount("money").money
 end
 
- if Player.getAccount("bank").money == nil then
+ if xPlayer.getAccount("bank").money == nil then
     bank = 0
 else
-    bank = Player.getAccount("bank").money
+    bank = xPlayer.getAccount("bank").money
 end
 
 local job = xPlayer.job.name
