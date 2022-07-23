@@ -14,13 +14,13 @@ local _source = source
 local xPlayer = ESX.GetPlayerFromId(_source)
 
  if Player.getAccount("money").money == nil then
-    cash == 0
+    cash = 0
 else
     cash = Player.getAccount("money").money
 end
 
  if Player.getAccount("bank").money == nil then
-    bank == 0
+    bank = 0
 else
     bank = Player.getAccount("bank").money
 end
