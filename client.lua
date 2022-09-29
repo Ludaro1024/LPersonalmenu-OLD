@@ -206,7 +206,9 @@ function openMenu()
                        
                        local newitem = NativeUI.CreateItem(ESX.PlayerData.inventory[i].label, "")
                        newitem:RightLabel("x" .. ESX.PlayerData.inventory[i].count)
+				if ESX.PlayerData.inventory[i].label ~= nil or newitem ~= nil then
                        inventory:AddItem(newitem)
+					end
 
                    
              
