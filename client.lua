@@ -197,11 +197,11 @@ function openMenu()
     refreshmenu()
 	mainmenu:Visible(true)
     -- inventory
-    if Config.Inventory then
+    if Config.Inventory and aa then
         local inventory = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['InventoryItemName'])
         refreshmenu()
         for i = 1, #ESX.PlayerData.inventory, 1 do
-            if ESX.PlayerData.inventory[i].count > 0 then
+            if ESX.PlayerData.inventory[i].count then
                        --print(ESX.PlayerData.inventory[i].label)
                        
                        local newitem = NativeUI.CreateItem(ESX.PlayerData.inventory[i].label, "")
@@ -363,11 +363,10 @@ function openMenu()
         
         local wallet = _menuPool:AddSubMenu(mainmenu, Translation[Config.Locale]['WalletItemName'])
         refreshmenu()
-		if name ~= nil then
         local name = NativeUI.CreateItem(Translation[Config.Locale]['name'] .. name, "")
-			else
-			 local name = NativeUI.CreateItem(Translation[Config.Locale]['name'] .. "Unknown", "")
-			end
+		if name == nil then
+            local name = NativeUI.CreateItem(Translation[Config.Locale]['name'] .. "Unknown", "")
+        end
         wallet:AddItem(name)
         if Config.Badges then
         name:SetRightBadge(BadgeStyle.Tick)
