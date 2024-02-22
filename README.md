@@ -1,4 +1,4 @@
-# Ludaro-Personal-Menu-LPMenu-
+# LPersonalmenu
 We all know that krz_personalmenu is cool, but outdated and alot of people need an personalmenu thats new, fresh innovative and actually just not 7 years old.
 
 
